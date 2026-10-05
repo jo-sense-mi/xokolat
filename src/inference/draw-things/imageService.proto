@@ -1,0 +1,88 @@
+// The Draw Things gRPC interface, as much of it as xokolat speaks — written here rather than
+// copied from the Python skill's vendored copy, so this repo carries no third-party file with
+// its own licence. Field numbers and types are facts of the wire protocol (talking to a server
+// requires agreeing with it), not a design of ours; everything xokolat does not use is absent.
+//
+// The server is `gRPCServerCLI-macOS`, first-party and separately downloadable (PLAN §12), run
+// with `--no-tls --no-response-compression`. Reference: the request shape, the LoRA
+// MetadataOverride and the pixel decode in `~/src/agent-skills/media/draw-things-grpc/`.
+
+syntax = "proto3";
+
+// ⚠️ NO `package` DECLARATION, deliberately. The package name is part of the gRPC method path
+// (`/<package>.<service>/<method>`), and the server serves `/ImageGenerationService/Echo`.
+// Adding a package here is a 12 UNIMPLEMENTED against a server that is running perfectly.
+
+service ImageGenerationService {
+  // Streams progress and then the finished image(s).
+  rpc GenerateImage(ImageGenerationRequest) returns (stream ImageGenerationResponse);
+  // The model catalog, and our liveness question of last resort.
+  //
+  // ⚠️ NOT a health check (PLAN §13.2). Echo shares a lane with the work: with
+  // `--echo-on-queue` it deadlocks the server outright, and even without it, the FIRST Echo
+  // after a cold start scans the whole models directory (tens of GB → ~40s). Liveness is a
+  // plain TCP probe; Echo is only ever asked when we actually want the catalog.
+  rpc Echo(EchoRequest) returns (EchoReply);
+}
+
+message EchoRequest {
+  string name = 1;
+  optional string sharedSecret = 2;
+}
+
+message EchoReply {
+  string message = 1;
+  repeated string files = 2;
+  optional MetadataOverride override = 3;
+  bool sharedSecretMissing = 4;
+}
+
+// Carries UTF-8 JSON metadata for models the server would not otherwise recognise. Builtin
+// ("official") entries are omitted — the server already knows those.
+message MetadataOverride {
+  bytes models = 1;
+  bytes loras = 2;
+  bytes controlNets = 3;
+  bytes textualInversions = 4;
+  bytes upscalers = 5;
+}
+
+enum DeviceType {
+  PHONE = 0;
+  TABLET = 1;
+  LAPTOP = 2;
+}
+
+message ImageGenerationRequest {
+  optional bytes image = 1;        // init image, as a ccv tensor (img2img)
+  int32 scaleFactor = 2;
+  optional bytes mask = 3;
+  repeated HintProto hints = 4;    // ControlNet / IP-Adapter / moodboard reference tensors
+  string prompt = 5;
+  string negativePrompt = 6;
+  bytes configuration = 7;         // the whole parameter set, as a FlatBuffer
+  MetadataOverride override = 8;
+  repeated string keywords = 9;
+  string user = 10;
+  DeviceType device = 11;
+  repeated bytes contents = 12;
+  optional string sharedSecret = 13;
+  bool chunked = 14;
+}
+
+message HintProto {
+  string hintType = 1;
+  repeated TensorAndWeight tensors = 2;
+}
+
+message TensorAndWeight {
+  bytes tensor = 1;
+  float weight = 2;
+}
+
+message ImageGenerationResponse {
+  repeated bytes generatedImages = 1;   // ccv tensors: 68-byte header + Float16 NHWC in [-1, 1]
+  optional bytes previewImage = 4;
+  optional int32 scaleFactor = 5;
+  repeated string tags = 6;
+}

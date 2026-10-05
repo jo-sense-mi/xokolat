@@ -1,0 +1,43 @@
+# dependencies
+node_modules/
+
+# ⚠️ EVERY RULE BELOW IS ANCHORED WITH A LEADING SLASH — these name ROOT folders, and an
+# unanchored `content/` matches a directory of that name at ANY depth. It silently swallowed
+# `src/content/` (five source files: the indexer, the master writer, run records, verdicts,
+# reveal), so the repo did not contain the code it was running.
+
+# build output
+/dist/
+*.tsbuildinfo
+
+# packaging (Phase 4)
+/out/
+/release/
+
+# generated content — the content root defaults OUTSIDE the repo (PLAN.md §9),
+# but ignore it here too in case a dev points XOKOLAT_CONTENT at the working tree
+/content/
+
+# provisioned models and binaries — downloaded, hash-verified, never committed
+/models/
+/bin/
+
+# local config and secrets (API keys for cloud LLM endpoints)
+.env
+.env.*
+!.env.example
+# ⚠️ AND ONE THAT IS NOT LOCAL CONFIG. `.env.dev` holds dev's library URL, port and folders
+# (home-relative) and no secret — a fact about this repo rather than about somebody's shell.
+# Secrets keep the rule above.
+!.env.dev
+
+# macOS
+.DS_Store
+
+# your own notes, not the app
+deploymentguide.md
+deployment-oracle-linux-readiness.md
+
+# the publish check's list of personal identifiers (scripts/publish-public.ts) — publishing the
+# list would publish what it protects
+/.public-leaks

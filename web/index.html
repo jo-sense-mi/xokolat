@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- viewport-fit=cover + env(safe-area-inset-*) in app.css: the floating composer clears the
+       iPhone home indicator instead of hiding under it. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>xokolat</title>
+  <!-- Installable on the phone (Share → Add to Home Screen). `display: standalone` drops
+       Safari's URL bar, which is also what makes the 100dvh shell exact. -->
+  <link rel="manifest" href="/app.webmanifest">
+  <meta name="theme-color" content="#212129">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="xokolat">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <!-- ?v= busts the browser's heuristic cache. Bump it whenever app.css changes; module ?v=
+       tags live in the import specifiers — keep them IDENTICAL for the same file everywhere,
+       or the browser loads two instances of a stateful module. -->
+  <link rel="stylesheet" href="/app.css?v=129">
+</head>
+<body class="studio-shell">
+  <!-- ⚠️ THE BAR IS MOBILE CHROME AND NOTHING ELSE NOW (2026-08-31). It used to run the full width
+       of the desktop window carrying a logo, a flash line, ▶, ★ and ⟩ — 45px of permanent band
+       above the only pane that ever wants more height. Every one of those had a truer home: the
+       mark belongs at the top of the nav column, ▶ and the flash line at its foot, ⟩ became the
+       pane's own grip (app.css → `.right-grip`), and ★ is deleted. What is left here is the phone,
+       where the nav is a hidden drawer and this is the only chrome there is: where you are, and
+       the three things that open a pane.
+
+       ☰ / 🔎 / ⚙ carry no `mobile-only` class any more — the BAR is the thing the desktop hides,
+       so marking its children as well was saying it twice. -->
+  <header class="bar">
+    <button id="nav-toggle" class="btn" title="Sections" aria-label="Sections">☰</button>
+    <!-- The only thing telling you where you are once the nav is a drawer. -->
+    <span id="crumb" class="muted"></span>
+    <span class="spacer"></span>
+    <button id="filters-toggle" class="btn" title="Show the section's filters" aria-label="Filters">🔎<span id="filters-badge" class="opts-badge"></span></button>
+    <button id="opts-toggle" class="btn" title="Options" aria-label="Options">⚙</button>
+  </header>
+  <!-- The 🔌 picker, anchored ABOVE the ask bar's chip row — the bar floats at the bottom of the
+       centre pane, so a panel dropping down from it would open into the fold. Outside the shell
+       so no pane's overflow can clip it. -->
+  <div class="shell">
+    <!-- ⚠️ THE NAV IS THE FULL HEIGHT OF THE WINDOW, and it is THREE parts, not one scroller.
+         The groups grow at different rates: `media` is fixed at six forever, `compositions` is
+         yours and unbounded, `settings` is fixed at four and is the one you need rarely but must
+         always be able to find. A single scrolling column puts the unbounded group in the MIDDLE
+         and pushes the fixed tail off screen — at thirty compositions ✨ xoko and 📚 library are
+         below the fold, and 📚 is where those compositions came from.
+
+         `margin-top: auto` does not fix that: it only pushes while there is slack, so it stops
+         working at exactly the length that made it necessary. The scroll has to belong to the
+         MIDDLE — head and foot are outside it and cannot be scrolled away. -->
+    <nav id="nav" class="shell-nav">
+      <div class="nav-head">
+        <!-- THE MARK IS THE ICON FILE, not a glyph. One file is the logo everywhere — here, the
+             tab, the home screen, and the site (xokolat-web copies this exact file at build). -->
+        <h1><img src="/icon.svg" class="brand-mark" alt="" width="22" height="22"><span>xokolat</span></h1>
+      </div>
+      <div id="nav-scroll" class="nav-scroll"></div>
+      <div id="nav-foot" class="nav-foot">
+        <!-- The pinned groups (GROUPS → `pinned`) land here, above the chrome. -->
+        <div id="nav-pinned"></div>
+        <!-- ⚠️ ONE CHROME BLOCK, MOVED RATHER THAN DUPLICATED (shell.js → `placeChrome`). On the
+             phone the nav is a drawer, so a queue readout living in it would be a readout you
+             have to open a drawer to read — and two readouts of one fact is the thing this app
+             keeps removing. So the block itself relocates into the bar below 860px. -->
+        <div id="chrome" class="chrome">
+          <span id="note" class="muted"></span>
+          <!-- ▶ THE APP'S ONE QUEUE READOUT, and the only door to the list. The lane is serial, so
+               the live truth is one job and a count of what is waiting; the running job's name is
+               in the title. It navigates nowhere — it puts the list over the right pane, and
+               pressing it again puts back exactly what was there. -->
+          <button id="queue-btn" class="btn queue-btn" title="the queue">
+            <span class="qb-ic">▶</span><span class="qb-label">queue</span><span id="queue-n" class="qb-n"></span><span id="queue-t" class="qb-t"></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+    <div class="shell-center">
+      <div id="feed" class="shell-feed"><p class="empty">loading…</p></div>
+      <div id="dock" class="shell-dock"></div>
+    </div>
+    <!-- ONE COLUMN, THREE STATES (shell.js → setRight): shut · tabs · queue. ⚙ and ⓘ are TABS
+         because both are about the section you are in; the ▶ queue is about the app, so it
+         SUPERSEDES the column rather than taking a seat in the strip — summoned by the nav's
+         button, dismissed by the same button or its own ✕, restoring whatever it interrupted.
+         `#queue` is built in JS and inserted after `#opts`. -->
+    <aside class="shell-right">
+      <!-- ↔ THE GRIP IS THE PANE'S ONE CONTROL: click to shut or bring back, drag to size, drag
+           past the edge to shut, arrows (⌥ for single pixels) for the keyboard. It replaced a ⟩
+           button in a bar that no longer exists, which is why it stays on screen while the pane
+           is shut — folded to a 22px rail at the window's edge, drawing a tab at its top so the
+           closed pane reads as closed rather than gone (app.css → `.right-grip`).
+           A separator, not decoration: focusable and arrow-driven, because a control that is only
+           reachable with a mouse is a control some people cannot use. Desktop only — below 860px
+           this pane is a slide-over sheet and the grid is one column, so there is nothing to size. -->
+      <div id="right-grip" class="right-grip desktop-only" role="separator"
+           aria-orientation="vertical" aria-label="Options panel" tabindex="0"></div>
+      <div class="sheet-head mobile-only">
+        <span id="sheet-title" class="sheet-title">options</span>
+        <span class="sheet-grip"></span>
+        <button id="sheet-close" class="btn mini" title="Close" aria-label="Close">✕</button>
+      </div>
+      <div id="opts" class="shell-opts"></div>
+    </aside>
+  </div>
+  <div id="scrim" class="scrim"></div>
+  <script type="module">
+    import { boot } from '/lib/shell.js?v=129'
+    boot()
+  </script>
+</body>
+</html>

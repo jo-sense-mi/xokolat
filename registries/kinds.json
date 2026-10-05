@@ -1,0 +1,61 @@
+{
+ "$comment": "WHAT CAN BE ASKED FOR — the app's vocabulary of capabilities, and the axis both the picker and the 🔌 page group by. One row per KIND; a workflow declares which one it answers for. This list decides ORDER and MEANING, never legality: a workflow naming a kind nobody described still works, it simply has no gloss and sorts last, which is how a service can bring a verb this build has never heard of. Your own rows live at <app data>/registries/kinds.json — same slug replaces in place, a new slug is appended.",
+ "$medium": "WHAT THE VERB PRODUCES, and the band it sits in when capabilities are listed. Declared rather than read off whichever service happens to run it: inference is right until a service serves two media, and then it is wrong silently — the same reason a checkpoint's caps are never guessed from its filename. ⚠️ A VERB THAT SPANS TWO MEDIA IS TWO ROWS: `t2i` is words→picture, and words→song will be its own row with its own name. A new medium brings its own verbs rather than borrowing the image ones, which is what keeps this a flat list instead of a matrix. ⚠️ AND THERE IS NO TEXT ROW, SINCE 2026-08-30. `chat` lived here and it was the one kind nobody ever picked: words are not something this app makes and keeps, they are how you ASK for the things it does. An LLM connects to xoko (✨ the connection, one place), and anything that needs writing — a chain's `text` step, a prompt turned into the words a model reads, a look described — is xoko doing it. A workflow for that would be a second, worse way to reach the same agent.",
+ "kinds": [
+  {
+   "slug": "t2i",
+   "medium": "image",
+   "face": "from words alone"
+  },
+  {
+   "$row": "⚠️ THIS ROW ATE THREE OTHERS ON 2026-09-04 — `edit`, `ref` and `style`. They named PLUMBING, not asks. FLUX.2 klein takes one graph and one attached picture and decides from the WORDS whether you meant \"change the bag to blue\" (an edit), \"the same character on a beach\" (keep the subject) or \"redraw this as a watercolour\" — the official ComfyUI klein template is literally one ReferenceLatent graph doing all of it. Three kinds where a person has one ask, and the split only ever existed because SDXL needed an IP-Adapter pointed at different blocks to fake what this model does natively. The mechanical difference survives as TWO WORKFLOWS told apart by their labels; it is not a capability a person chooses between. `style` had a second problem: a STYLE in this app is WORDS, with its own layer and its own page, and the workflow SLOT was already renamed to `look` in August over the same collision — a third meaning of the noun was one too many. `structure` was SDXL's ControlNet (\"follow these edges\") which nothing answers and nobody says out loud, and `inpaint` never had a workflow in its life: it needs a mask before it can do anything, and masking is not what someone in a hurry to make something wants to be doing.",
+   "slug": "i2i",
+   "medium": "image",
+   "face": "a picture you attach, and words for what to do with it"
+  },
+  {
+   "slug": "cutout",
+   "medium": "image",
+   "face": "the background taken out — no words at all"
+  },
+  {
+   "$band": "THE OTHER THREE MEDIA (2026-08-17). They are here because the app can now reach them — one adapter speaks ComfyUI, and a workflow there carries its own graph — and each brings its OWN verbs rather than borrowing the image ones, which is the rule stated in $medium above. The names are the field's, not ours: `tts` is what everyone who has ever run one calls it, and `t2m` reads next to `t2i` because it is the same sentence about a different medium.",
+   "slug": "tts",
+   "medium": "voice",
+   "face": "words, read aloud in a voice you describe"
+  },
+  {
+   "slug": "t2m",
+   "medium": "music",
+   "face": "a song from tags, a mood and a length"
+  },
+  {
+   "$row": "⚠️ THE ONE THAT TAKES A PICTURE AND NOT A SENTENCE, which is why it is not `t2·` anything. Every image-to-3D model worth having reads a cut-out subject on transparency — the mesh follows the silhouette — so the workflow takes a `ref` and no prompt at all, exactly like `cutout` does one medium over.",
+   "slug": "i23d",
+   "medium": "model3d",
+   "face": "a picture you attach, turned into a mesh"
+  },
+  {
+   "$row": "⚠️ THE SAME MEDIUM, A DIFFERENT ASK — and it is a KIND, not a composition (2026-08-30). A mesh from a sentence is one press: a ComfyUI graph holds the t2i nodes and the Hunyuan3D nodes together, so it is one engine, one ask, one piece out. Running it as a chain instead would file the mesh in the chain's own feed, because anything generated in a section stays in that section — and somebody who asks for a 3D dragon should find it in 🧊. ⚠️ AND IT IS WHAT MAKES 🧊 WORDY: with only `i23d` installed the section is FROM A PICTURE ONLY, and nothing xoko can do puts a file on the tray.",
+   "slug": "t23d",
+   "medium": "model3d",
+   "face": "a mesh from words — it draws the subject first, then builds it"
+  },
+  {
+   "$band": "THE TWO MEDIA ADDED 2026-08-23 — video and sound. Same rule as the band above: each brings its OWN verbs rather than borrowing the image ones. ⚠️ AND `t2s` IS NOT `t2m`: a song and a door slam come out of the same kind of node and are asked for, browsed and judged nothing alike (DECISIONS.md).",
+   "slug": "t2v",
+   "medium": "video",
+   "face": "a shot from words — say what moves"
+  },
+  {
+   "slug": "i2v",
+   "medium": "video",
+   "face": "a picture you attach, as the shot's first frame"
+  },
+  {
+   "slug": "t2s",
+   "medium": "sound",
+   "face": "an effect, a bed or an ambience, from words"
+  }
+ ]
+}

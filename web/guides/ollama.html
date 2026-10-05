@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ollama — xokolat guides</title>
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<main>
+
+<a class="up" href="index.html">← all guides</a>
+
+<h1>Ollama</h1>
+<p class="lede">A local language model, on port <code>11434</code>. This is one of the things xoko
+— the app's brain — can think with, and the only one that costs nothing and sends nothing
+anywhere.</p>
+
+<p>xoko can also use Claude Code (your own subscription, through the client you logged into in a
+terminal) or OpenRouter (a key you paste once). Ollama is the one that needs no account at all,
+and it is slower than either of them on a laptop. All three are honest choices.</p>
+
+<h2>Install and run</h2>
+
+<pre><code>brew install ollama          # or download from https://ollama.com
+ollama serve</code></pre>
+
+<p>Then pull a model. Whatever you pull is what xokolat's picker will offer — it asks Ollama for
+its list rather than assuming one:</p>
+
+<pre><code>ollama pull qwen3:8b         # a good middle size
+ollama list                  # what you have</code></pre>
+
+<div class="route">
+  <span class="tag">Route B — headless</span>
+  <h3>At login, without a terminal</h3>
+  <p>Ollama ships its own service definition, so there is no plist to write:</p>
+  <pre><code>brew services start ollama          # macOS
+systemctl --user enable --now ollama # Linux, if installed that way</code></pre>
+  <p>The macOS desktop app does the same thing when it is running — a menu-bar item and a server
+  on 11434. Either is fine; do not run both.</p>
+</div>
+
+<p>No GPU-session trap here. Ollama's Metal path does not need a graphical session, so a plain
+background service works.</p>
+
+<h2>Checking it worked</h2>
+
+<pre><code>curl -s http://127.0.0.1:11434/api/tags</code></pre>
+
+<p>Then in xokolat: <b>🔌 inference → Ollama → ↻</b>, and the models you pulled appear in xoko's
+model picker.</p>
+
+<div class="trap">
+  <strong>Size the model to the machine, not to the benchmark.</strong>
+  A model larger than your free memory does not fail — it swaps, and a reply that would take eight
+  seconds takes four minutes. If xoko feels broken rather than slow, pull something smaller before
+  assuming anything else.
+</div>
+
+<div class="foot">
+  xokolat talks to Ollama through its OpenAI-compatible endpoint at <code>/v1</code>, which is the
+  same adapter it uses for LM Studio, llama.cpp's server, and OpenRouter. Any of them can be added
+  as a service row with a host, a port and a path.
+</div>
+
+</main>
+</body>
+</html>

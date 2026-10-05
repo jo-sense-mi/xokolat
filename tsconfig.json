@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    // Node 26 runs .ts directly by stripping types — no build step, no bundler, no tsx.
+    // `erasableSyntaxOnly` is what guarantees that: it bans enums, namespaces and parameter
+    // properties, the syntax the stripper cannot erase. `verbatimModuleSyntax` forces
+    // `import type`, so a type import never survives as a runtime import that resolves to
+    // nothing. Together they mean: if `npm run check` passes, node can run it.
+    "target": "es2024",
+    "lib": ["es2024"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts"]
+}

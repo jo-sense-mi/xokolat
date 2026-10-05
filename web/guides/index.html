@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting an engine running — xokolat</title>
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<main>
+
+<h1>Getting an engine running</h1>
+<p class="lede">xokolat does not generate anything itself. It asks something that does — and that
+something has to be running before there is anything to ask. These are the guides for the ones it
+knows how to talk to.</p>
+
+<p>Every one of them has the same two routes, and neither is more correct than the other:</p>
+
+<ul>
+  <li><b>Open the app and switch its server on.</b> Draw Things and ComfyUI both have one. Nothing
+    to install, nothing to configure — but the app has to stay open for xokolat to reach it.</li>
+  <li><b>Run it headless, in the background.</b> A per-user launch agent that starts at login and
+    restarts if it dies. No window, nothing to remember, and xokolat finds it already answering
+    every time. This is the route with the traps in it, which is why these pages exist.</li>
+</ul>
+
+<p>Once one is running, open <b>🔌 inference</b> in xokolat and press <b>↻</b> on its card. If the
+card says <i>reachable</i> and lists checkpoints, you are done.</p>
+
+<div class="cards">
+  <a class="card" href="draw-things.html">
+    <b>Draw Things → images</b>
+    <span>The gRPC server. Every picture xokolat makes today comes from here. macOS only.</span>
+  </a>
+  <a class="card" href="comfyui.html">
+    <b>ComfyUI → images, and everything else</b>
+    <span>Graph-based, runs anywhere. Music, voice, video and 3D all come from here.</span>
+  </a>
+  <a class="card" href="ollama.html">
+    <b>Ollama → words</b>
+    <span>A local language model for xoko, the app's brain. The smallest of the three.</span>
+  </a>
+  <a class="card" href="services.html">
+    <b>Engines in the background</b>
+    <span>Run them as services, and keep them updated — the half that fails silently.</span>
+  </a>
+</div>
+
+<hr>
+
+<h2>Why headless is worth the ten minutes</h2>
+
+<p>The app-window route is genuinely fine, and if it suits you there is nothing wrong with it. What
+you give up is smaller than it sounds and more annoying than it sounds: the engine is only there
+when you remember to put it there. A machine that has been asleep, a Mac that rebooted for an
+update, a window you closed to free memory — each one turns xokolat into an app with a red card on
+it until you notice why.</p>
+
+<p>A launch agent removes the noticing. It also means the engine is not competing with a UI for the
+GPU, and that logs land in a file you can read rather than scrolling past in a terminal.</p>
+
+<div class="foot">
+  These pages ship with xokolat and are also published at xoko.lat, so you can read them before
+  installing anything.
+</div>
+
+</main>
+</body>
+</html>

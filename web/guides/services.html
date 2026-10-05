@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engines in the background — xokolat guides</title>
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<main>
+
+<a class="up" href="index.html">← all guides</a>
+
+<h1>Engines in the background</h1>
+<p class="lede">Every engine xokolat talks to is a server. Once you accept that, the app-with-a-window
+is the wrong shape for it — you want it running quietly at login, and one command that keeps it
+current. This page is both halves.</p>
+
+<h2>Run it as a service</h2>
+
+<p>On macOS the short path is Homebrew. A <em>user</em> service is a launch agent: it starts when
+you log in, restarts if it dies, and writes its output to a log instead of a terminal you have to
+keep open.</p>
+
+<pre><code>brew services start comfyui
+brew services list
+brew services restart comfyui</code></pre>
+
+<p>Not every engine ships a formula. When one doesn't, you write a small one that points at a
+runner script — a few lines that export the environment and <code>exec</code> the server. That is
+all the ComfyUI and Draw Things services on this machine are.</p>
+
+<div class="trap">
+  <strong>Bind to 127.0.0.1 unless you mean otherwise.</strong>
+  An engine listening on <code>0.0.0.0</code> is reachable by anything on the network, and none of
+  these have authentication. Keep them local, and reach them from another machine over a private
+  network rather than by opening the port.
+</div>
+
+<p>On Linux the same idea is a systemd <b>user</b> unit (<code>systemctl --user enable --now
+comfyui</code>). On Windows it is a scheduled task set to run at logon. The mechanism differs; what
+you want from it does not.</p>
+
+<h2>Keep it up to date</h2>
+
+<p>This is the half everyone skips, and it fails silently: an engine installed once and never
+updated keeps working, so nothing tells you it has fallen a year behind — until a workflow needs a
+node that shipped six months ago.</p>
+
+<p>Nothing else will do it for you. These engines are not packages: your package manager cannot see
+a <code>git clone</code> in your home directory, and a binary downloaded from a release page is
+invisible to everything. So give each engine <b>one script that owns its whole update</b>, and have
+whatever you already run weekly call that.</p>
+
+<div class="route">
+  <span class="tag">what one update script does</span>
+  <ol>
+    <li>Note the version that is running now.</li>
+    <li>Stop the service.</li>
+    <li>Pull the new code, and reinstall its dependencies.</li>
+    <li>Start the service and <b>ask it a question</b> — an HTTP request it can only answer if it
+      really came back.</li>
+    <li>If it doesn't answer, put the old version back and say so loudly.</li>
+  </ol>
+</div>
+
+<div class="trap">
+  <strong>Ask about the thing you changed, not just whether it is alive.</strong>
+  A liveness question — "are you answering?" — cannot see everything an update can break. Install
+  something that makes an engine <em>faster</em> rather than <em>different</em>, and a broken
+  version answers exactly like a working one: the check says all fine, and you find out weeks later
+  from a render that takes an hour. So when an engine gains a capability you care about, the update
+  script gains a question that only a working version can answer.
+</div>
+
+<p>Step five is the one that matters. Following the tip of a branch means running code nobody has
+released yet, so eventually a version will not start — and an update that leaves a dead engine
+behind is worse than no update at all. With a rollback you get the newest code when it works, and
+last week's when it doesn't.</p>
+
+<div class="trap">
+  <strong>Two rules that keep an unattended run safe.</strong>
+  It must never need <code>sudo</code> — a password prompt in a background job waits forever. And it
+  must be silent when nothing changed but loud when something broke, or you will stop reading the
+  output and never notice the day it stopped working.
+</div>
+
+<h2>Where the scripts live</h2>
+
+<p>xokolat ships one per engine it knows, in <code>services/&lt;id&gt;/update.sh</code> inside the
+app itself, named for the service's id in the inference registry. They come back with any
+reinstall, so they cannot be lost. To add one for an engine of your own, put it in your data folder
+under the same shape — a packaged app cannot write to its own install folder, which is what this
+second layer is for:</p>
+
+<pre><code>~/Library/Application Support/xokolat/services/&lt;id&gt;/update.sh</code></pre>
+
+<p>Same rule as the registries — the same id replaces the shipped script, a new id is added
+alongside. Then a single line wires the lot into whatever you already run:</p>
+
+<pre><code>[commands]
+"xokolat engines" = "&lt;your xokolat folder&gt;/scripts/update-services.sh"</code></pre>
+
+<p>That is one line forever. Adding a fourth engine means dropping in a fourth folder, never
+editing that config again.</p>
+
+<div class="trap">
+  <strong>Only ever put a script there by hand.</strong>
+  These run unattended, on a schedule, as you. That folder must never be written to by anything
+  arriving over a network — a downloaded workflow, a shared graph, an installer. xokolat never
+  writes there itself.
+</div>
+
+<h2>Models are not part of this</h2>
+
+<p>None of it touches checkpoints. Weights are tens of gigabytes, they are yours, and you replace
+them when <em>you</em> decide a workflow needs something new. An update script that quietly pulled a
+40&nbsp;GB model on a Sunday morning would be a bug.</p>
+
+<div class="foot">
+  These pages ship with xokolat and are also published at xoko.lat, so you can read them before
+  installing anything.
+</div>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,113 @@
+/* The engine guides — plain pages, no app shell, no script.
+ *
+ * ⚠️ SELF-CONTAINED ON PURPOSE. These same files are what xoko.lat publishes, where there is no
+ * app.css and no one has installed anything yet. They must read correctly for someone who has
+ * never seen xokolat, opened from a link, offline. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #fbfaf8;
+  --fg: #1c1a17;
+  --dim: #6b665f;
+  --line: #e2ded7;
+  --code-bg: #f2efe9;
+  --warn: #8a4b12;
+  --warn-bg: #fdf3e6;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161513;
+    --fg: #eae6df;
+    --dim: #9b948a;
+    --line: #2e2c28;
+    --code-bg: #201f1c;
+    --warn: #e0a463;
+    --warn-bg: #241d13;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 3rem 1.25rem 6rem;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.65 ui-sans-serif, -apple-system, "Segoe UI", system-ui, sans-serif;
+}
+
+main { max-width: 46rem; margin: 0 auto; }
+
+a { color: inherit; text-underline-offset: 3px; }
+
+.up { display: inline-block; margin-bottom: 2rem; color: var(--dim); font-size: .9rem; }
+
+h1 { margin: 0 0 .35rem; font-size: 1.9rem; line-height: 1.2; letter-spacing: -.02em; }
+h2 { margin: 2.75rem 0 .75rem; font-size: 1.2rem; letter-spacing: -.01em; }
+h3 { margin: 1.75rem 0 .5rem; font-size: 1rem; }
+
+.lede { margin: 0 0 2rem; color: var(--dim); font-size: 1.05rem; }
+
+p, ul, ol { margin: 0 0 1rem; }
+li { margin-bottom: .35rem; }
+
+hr { margin: 2.5rem 0; border: 0; border-top: 1px solid var(--line); }
+
+code {
+  padding: .1em .35em;
+  border-radius: 4px;
+  background: var(--code-bg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .875em;
+}
+
+/* ⚠️ THE ONE THING THAT MUST SCROLL RATHER THAN WRAP. A command line broken across lines by the
+ * browser is a command line someone pastes wrong. */
+pre {
+  margin: 0 0 1.25rem;
+  padding: .9rem 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--code-bg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .82rem;
+  line-height: 1.55;
+}
+pre code { padding: 0; background: none; font-size: inherit; }
+
+/* A trap, not a decoration. Reserved for the things that cost someone an afternoon. */
+.trap {
+  margin: 1.5rem 0;
+  padding: .9rem 1.1rem;
+  border: 1px solid var(--warn);
+  border-left-width: 4px;
+  border-radius: 6px;
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.trap p:last-child, .route p:last-child { margin-bottom: 0; }
+.trap strong { display: block; margin-bottom: .25rem; }
+
+.route {
+  margin: 1.25rem 0;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.route h3 { margin-top: 0; }
+.route .tag { display: block; margin-bottom: .2rem; color: var(--dim); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
+
+.cards { display: grid; gap: .75rem; margin: 2rem 0; }
+.card {
+  display: block;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-decoration: none;
+}
+.card:hover { border-color: var(--dim); }
+.card b { display: block; margin-bottom: .15rem; }
+.card span { color: var(--dim); font-size: .92rem; }
+
+.foot { margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--line); color: var(--dim); font-size: .88rem; }

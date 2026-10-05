@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="7.5 8.5 56 47.5" width="64" height="64">
+  <!-- Solid Luminous Yellow Body -->
+  <path d="M 32 10 C 48 10, 56 22, 54 42 C 52 52, 42 54, 30 54 C 16 54, 8 48, 10 38 C 12 22, 20 10, 32 10 Z" fill="#FACC15"/>
+
+  <!-- Black Body Contour -->
+  <path d="M 32 10 C 48 10, 56 22, 54 42 C 52 52, 42 54, 30 54 C 16 54, 8 48, 10 38 C 12 22, 20 10, 32 10 Z" stroke="#09090B" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+
+  <!-- Concentric Eye -->
+  <circle cx="37" cy="24" r="7.5" fill="#FFFFFF" stroke="#09090B" stroke-width="2.5"/>
+  <circle cx="37" cy="24" r="3" fill="#09090B"/>
+
+  <!-- Enlarged Vermilion Beak -->
+  <path d="M 44 20 L 62 25 L 44 33 Z" fill="#EF4444" stroke="#09090B" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Internal Blue Wing Crescent -->
+  <path d="M 18 36 C 12 46, 32 48, 36 43 C 28 41, 23 37, 18 36 Z" fill="#2563EB" stroke="#09090B" stroke-width="1.8"/>
+
+  <!-- Clean Floating Red Satellite Dot -->
+  <circle cx="22" cy="22" r="2.5" fill="#EF4444"/>
+</svg>

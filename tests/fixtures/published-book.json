@@ -1,0 +1,101 @@
+{
+  "format": 1,
+  "type": "composition",
+  "composition": {
+    "slug": "book",
+    "label": "book",
+    "icon": "📖",
+    "family": "books",
+    "notes": "Say what the book is about — a subject, or the list of things it should cover, one per line — and get back **one file you can print**. The pages are written first, one line each, in reading order; every line is then turned into a picture of its own; and the last step **binds them**, page one taking line one. It is the shape of a concept book, an A-to-Z or a small guide, and it is the first composition here that leaves you something other than a pile of pictures.",
+    "steps": [
+      {
+        "id": "pages",
+        "makes": "text",
+        "list": true,
+        "inputs": {
+          "prompt": "ask"
+        },
+        "says": "You are writing the pages of a short illustrated book. Write ONE LINE PER PAGE, in reading order. Each line is the whole caption for that page: one or two plain sentences, concrete, written for somebody meeting the idea for the first time. If the reader gave you a list, keep their order and cover every item. If they gave you a subject, choose between eight and sixteen pages that cover it. No numbering, no headings, no blank lines — just the lines."
+      },
+      {
+        "id": "scenes",
+        "makes": "text",
+        "each": "pages",
+        "inputs": {
+          "prompt": "pages"
+        },
+        "says": "This is one page of an illustrated book. Describe the picture that belongs beside it, for an image model. Name the subject first, then where it is, then the light. Describe only what can be SEEN — and no lettering, no captions and no writing anywhere in the picture, because the words go underneath it. One sentence."
+      },
+      {
+        "id": "art",
+        "makes": "image",
+        "each": "scenes",
+        "inputs": {
+          "prompt": "scenes"
+        },
+        "recommends": "draw-things-grpc/dev-fast",
+        "notes": "One picture per page, in page order — which the binder relies on.",
+        "params": {
+          "width": 1024,
+          "height": 1280
+        }
+      },
+      {
+        "id": "bound",
+        "binds": "pdf",
+        "parts": "art",
+        "captions": "pages",
+        "page": "square",
+        "notes": "⚠️ THE STEP THAT MAKES THIS A BOOK RATHER THAN A PILE, and it reaches no engine at all. `parts` is every picture `art` made, in order; `captions` is every line `pages` wrote. Page three is the third concept because both lists came out of the same `each`."
+      }
+    ]
+  },
+  "workflows": {
+    "draw-things-grpc/dev-fast": {
+      "format": 1,
+      "type": "workflow",
+      "service": "draw-things-grpc",
+      "workflow": {
+        "slug": "dev-fast",
+        "label": "FLUX.1 dev, at four steps",
+        "kind": "t2i",
+        "model": "flux_1_dev_q8p.ckpt",
+        "inputs": [
+          "prompt"
+        ],
+        "params": {
+          "steps": 4
+        },
+        "loras": [
+          {
+            "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt",
+            "weight": 1
+          }
+        ],
+        "notes": "The same checkpoint as `dev-t2i` and the same 28-step file — plus a step-distillation LoRA, which is what makes 4 steps a workflow rather than a mistake. Two rows, one file: literally inexpressible when the row IS the checkpoint."
+      },
+      "engine": {
+        "file": "flux_1_dev_q8p.ckpt",
+        "label": "FLUX.1 dev",
+        "memory": 16,
+        "caps": {
+          "negatives": false,
+          "idiom": "prose",
+          "words": [
+            30,
+            80
+          ]
+        },
+        "params": {
+          "steps": 28,
+          "cfg": 1,
+          "sampler": "Euler A Trailing",
+          "shift": 3.1581929,
+          "clipSkip": 2,
+          "guidanceEmbed": 4.5
+        },
+        "notes": "Guidance-distilled: the negative branch is inert at cfg 1, and steering happens through `guidanceEmbed` instead. 28 steps is Draw Things' own flux.1 default."
+      }
+    }
+  }
+}

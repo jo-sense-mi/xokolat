@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ComfyUI — xokolat guides</title>
+<link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<main>
+
+<a class="up" href="index.html">← all guides</a>
+
+<h1>ComfyUI</h1>
+<p class="lede">A graph-based engine that runs on macOS, Linux and Windows, and does a great deal
+that Draw Things does not — upscalers, restoration, segmentation, and whatever else people have
+written nodes for.</p>
+
+<div class="trap">
+  <strong>This is where everything but pictures comes from.</strong>
+  Music, voice, video and 3D all reach xokolat through ComfyUI — a workflow here is a node graph, run
+  as published. Get it running with this page, then take a workflow from the library and press it.
+</div>
+
+<p>It has no server switch to find, because it <em>is</em> a server: starting ComfyUI starts an
+HTTP API on port <code>8188</code> and a web page on the same port. The web page is a client, not
+the program.</p>
+
+<h2>Install it</h2>
+
+<p>ComfyUI is a Python program. Whatever else you do, give it its own virtual environment — its
+dependency set is large, opinionated about torch versions, and not something to share with
+anything.</p>
+
+<pre><code>git clone https://github.com/comfyanonymous/ComfyUI.git
+cd ComfyUI
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt</code></pre>
+
+<p>On an Apple Silicon Mac the default install already uses the GPU through Metal; there is no
+CUDA step and no extra index URL. On a Linux box with an NVIDIA card, install torch from the CUDA
+index first, as ComfyUI's own README describes for your driver version.</p>
+
+<div class="route">
+  <span class="tag">Route A — simplest</span>
+  <h3>Run it in a terminal</h3>
+  <pre><code>.venv/bin/python main.py --listen 127.0.0.1 --port 8188</code></pre>
+  <p>Leave the terminal open. <code>--listen 127.0.0.1</code> is worth typing even though it is
+  close to the default: ComfyUI has no authentication of any kind, and anything that can reach the
+  port can run arbitrary graphs — including ones that read files.</p>
+</div>
+
+<div class="route">
+  <span class="tag">Route B — headless</span>
+  <h3>Run it at login</h3>
+  <p>Same two mechanisms as anything else: a launch agent on macOS, a systemd user unit on Linux.
+  Both below.</p>
+</div>
+
+<h3>macOS — a launch agent</h3>
+
+<p>Save as <code>~/Library/LaunchAgents/lat.xoko.comfyui.plist</code>, replacing <code>YOU</code>
+and the path to your clone. launchd does not expand <code>~</code>.</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+  &lt;key&gt;Label&lt;/key&gt;
+  &lt;string&gt;lat.xoko.comfyui&lt;/string&gt;
+  &lt;key&gt;ProgramArguments&lt;/key&gt;
+  &lt;array&gt;
+    &lt;string&gt;/Users/YOU/src/ComfyUI/.venv/bin/python&lt;/string&gt;
+    &lt;string&gt;/Users/YOU/src/ComfyUI/main.py&lt;/string&gt;
+    &lt;string&gt;--listen&lt;/string&gt;&lt;string&gt;127.0.0.1&lt;/string&gt;
+    &lt;string&gt;--port&lt;/string&gt;&lt;string&gt;8188&lt;/string&gt;
+  &lt;/array&gt;
+  &lt;key&gt;WorkingDirectory&lt;/key&gt;
+  &lt;string&gt;/Users/YOU/src/ComfyUI&lt;/string&gt;
+  &lt;key&gt;RunAtLoad&lt;/key&gt;&lt;true/&gt;
+  &lt;key&gt;KeepAlive&lt;/key&gt;&lt;true/&gt;
+  &lt;key&gt;StandardOutPath&lt;/key&gt;&lt;string&gt;/Users/YOU/Library/Logs/comfyui.log&lt;/string&gt;
+  &lt;key&gt;StandardErrorPath&lt;/key&gt;&lt;string&gt;/Users/YOU/Library/Logs/comfyui.err.log&lt;/string&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;</code></pre>
+
+<pre><code>launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/lat.xoko.comfyui.plist</code></pre>
+
+<div class="trap">
+  <strong>A <em>user</em> agent here too, for the same reason.</strong>
+  On an Apple Silicon Mac, ComfyUI renders through Metal, and Metal wants the logged-in graphical
+  session. <code>gui/$(id -u)</code> puts it there. Do not run it under <code>sudo</code>.
+</div>
+
+<p><code>WorkingDirectory</code> matters more than it looks: ComfyUI resolves
+<code>models/</code>, <code>custom_nodes/</code> and <code>output/</code> relative to where it
+runs, and started from the wrong folder it comes up with an empty model list.</p>
+
+<h3>Linux — a systemd user unit</h3>
+
+<p>Save as <code>~/.config/systemd/user/comfyui.service</code>:</p>
+
+<pre><code>[Unit]
+Description=ComfyUI
+After=network.target
+
+[Service]
+WorkingDirectory=%h/src/ComfyUI
+ExecStart=%h/src/ComfyUI/.venv/bin/python main.py --listen 127.0.0.1 --port 8188
+Restart=on-failure
+
+[Install]
+WantedBy=default.target</code></pre>
+
+<pre><code>systemctl --user daemon-reload
+systemctl --user enable --now comfyui
+loginctl enable-linger $USER   # so it runs when you are not logged in</code></pre>
+
+<h2>Apple Silicon: one node you should not skip</h2>
+
+<p>ComfyUI on a Mac renders through Metal, and that works — for models stored in plain 16-bit
+weights. The interesting ones are not. Modern video and image checkpoints ship <b>quantized</b>
+(int8, fp8, nvfp4), and those formats were designed around NVIDIA hardware: the operations they
+need have no Metal implementation. PyTorch's answer is to quietly run them on the CPU instead.</p>
+
+<p>Quietly is the problem. Nothing errors. The render just takes hours, and the log line that says
+why scrolls past once at startup.</p>
+
+<pre><code>UserWarning: The operator 'aten::_int_mm' is not currently supported on
+the MPS backend and will fall back to run on the CPU.</code></pre>
+
+<p><a href="https://github.com/pawel-mazurkiewicz/ComfyUI-AppleSilicon-FP8">ComfyUI-AppleSilicon-FP8</a>
+fixes it. It adds no nodes and changes no workflow — it patches the maths at startup and everything
+you already have gets faster. It also moves large text encoders back onto the GPU, which is worth
+as much as the rest.</p>
+
+<pre><code>cd ~/ComfyUI/custom_nodes
+git clone https://github.com/pawel-mazurkiewicz/ComfyUI-AppleSilicon-FP8
+~/ComfyUI/.venv/bin/pip install -r ComfyUI-AppleSilicon-FP8/requirements.txt</code></pre>
+
+<p>Restart, and it prints one line saying what it found:</p>
+
+<pre><code>[AppleSilicon-FP8] capabilities: macOS=26.6.2, torch=2.12.0, mps=yes,
+compile_shader=yes, chip=Apple M5 Pro, matrix_units(M5+)=yes, ninja=yes</code></pre>
+
+<div class="trap">
+  <strong>Read that line.</strong>
+  <code>ninja=no</code> means the fast Metal kernels were never built and you are on the slower
+  fallback — <code>ninja</code> is in its requirements, so that usually means the install did not
+  finish. The M5 and macOS 26 entries are what unlock the native int8 kernel; older machines still
+  get the correctness fixes, just less of the speed.
+</div>
+
+<h2>Checking it worked</h2>
+
+<pre><code>curl -s http://127.0.0.1:8188/system_stats</code></pre>
+
+<p>That answers with JSON describing the machine and the device it will render on. Opening
+<code>http://127.0.0.1:8188</code> in a browser gets you ComfyUI's own graph editor, which is the
+easiest way to confirm your models are where it expects.</p>
+
+<div class="foot">
+  Models go under the clone's <code>models/</code> folder, split by kind
+  (<code>checkpoints/</code>, <code>loras/</code>, <code>controlnet/</code>…). If you already have
+  a library elsewhere, <code>extra_model_paths.yaml</code> points at it instead of duplicating it.
+</div>
+
+</main>
+</body>
+</html>

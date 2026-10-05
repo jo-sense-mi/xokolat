@@ -1,0 +1,15 @@
+{
+  "$comment": "Add-to-home-screen metadata for the phone (reached over the LAN or a tailnet). `standalone` drops the browser URL bar — which is also what makes the shell's 100dvh column exact on iOS.",
+  "name": "xokolat",
+  "short_name": "xokolat",
+  "description": "Say what you want to make; get a finished artifact.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0c0c11",
+  "theme_color": "#212129",
+  "icons": [
+    { "src": "icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ]
+}
