@@ -12,37 +12,44 @@ need one. "We built it, used it, and the shape was wrong" does.
 
 ---
 
-## 2026-10-05 — One app on every OS: one zip, Node 26 required, the browser is the window
+## 2026-10-05 — One app on every OS: `npx xokolat`, Node 26 required, the browser is the window
 
 0.1.x shipped as a macOS `.dmg` holding a `.app` whose window was a Swift WKWebView. It worked, and
-it could only ever exist for one OS: `swiftc`, `hdiutil`, Finder's AppleScript, `codesign`. The
-operator wants xokolat reachable on any OS now, with native apps per OS only if there is traction.
+it could only ever exist for one OS: `swiftc`, `hdiutil`, Finder's AppleScript, `codesign`, and a
+VPS upload with SELinux relabelling per release. The operator wants xokolat reachable on any OS now,
+with native apps per OS only if there is traction.
 
 The window was the only Mac-specific thing in it. Every pixel was already `web/` over 127.0.0.1,
 and the server was already OS-neutral (reveal knew `explorer` and `xdg-open`, the data root knew
-XDG). So `npm run package` (`scripts/package.ts`) writes **one** `out/xokolat-<v>.zip` — the app's
-files, under a megabyte — and the person runs `npm start` or `npm run background`. Both go through
-`scripts/launch.ts`, which runs `npm ci` first **once** — a marker in `node_modules` holds the
-lockfile's hash, so a newer download over the same folder installs again and nothing else does.
-That install fetches sharp's prebuilt for their own platform, the only per-OS thing the app has.
-The default browser opens, and when the port is already held **by a xokolat** (`/api/status`
-answers with an install id and its pid) it opens that instead of refusing. `background` detaches
-the server with a log in app data; `npm run stop` finds it by `lsof`, or on Windows by asking
-`/api/status` for its pid. Windows gained `%APPDATA%\xokolat` as its data root.
+XDG; Windows gained `%APPDATA%\xokolat`). So the app is an **npm package** and a person runs
+`npx xokolat` — `background` and `stop` beside it. **Node 26 is a requirement for every user**, the
+operator's call, checked by name.
 
-**Node 26 is a requirement for every user**, and that is the operator's call: the zip carries an
-`.npmrc` with `engine-strict` (and `omit=dev`), so an older Node is refused by name at install.
+**Two things make npx work, and neither is obvious:**
 
-**Rejected, the same day: six archives that carry their own Node.** Built and working — per target
-nodejs.org's Node, `npm ci --os --cpu` for sharp, a double-click launcher per OS, a quarantine
-workaround on macOS — at ~55 MB each, and six artifacts to publish for one app. With Node as a
-requirement all of it is the user's `npm ci`. **Rejected: Electron** — a window again, ~100 MB of
-Chromium per target, a signing story per OS. **Not yet: `npx xokolat`** — the nicest one-liner,
-but Node will not strip types under `node_modules` (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`),
-so it needs a small JS shim that runs the app from outside it. NEXT §17.
+- **Node will not strip types under `node_modules`** (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`),
+  which is exactly where npx installs. So the package's `bin` is `cli/xokolat.mjs`, plain JS, which
+  copies the app into `<data>/versions/<v>/` once per version and runs it there with the same
+  `scripts/launch.ts` a checkout uses. No build step: what runs is the published source.
+- **npm will not publish a lockfile** — `package-lock.json` never, and npm 12 left out
+  `npm-shrinkwrap.json` too. So `scripts/publish-npm.ts` puts the app's real `package.json` and
+  lockfile in `cli/app/`, and the top-level `package.json` lists **no dependencies**: npx downloads
+  ~650 KB and installs nothing, and `launch.ts` installs exactly the lockfile in the copy on the
+  first start (a marker holds the lockfile's hash, so it happens once).
 
-What was given up, knowingly: the app's own window, its Dock icon, ⌘Q, and double-clicking. Ctrl-C
-in the terminal, or `npm run stop`, is how it is stopped.
+`--open` opens the default browser, and when the port is already held **by a xokolat**
+(`/api/status` answers with an install id and its pid) it opens that instead of refusing.
+`background` detaches with a log in app data; `stop` finds the server by `lsof`, or on Windows by
+asking `/api/status` for its pid. Each start asks the registry for a newer version (1.5 s, silent
+offline) and says `npx xokolat@latest` when there is one. `XOKOLAT_OPEN=0` keeps the browser shut.
+
+**Rejected, the same day, one after the other:** six archives carrying their own Node (~55 MB each,
+a launcher and a quarantine workaround per OS), then one zip with `npm ci && npm start` — both built
+and working, and both an artifact to host per release that npx makes unnecessary. **Rejected:
+Electron** — a window again, ~100 MB of Chromium per target, a signing story per OS.
+
+What was given up, knowingly: the app's own window, its Dock icon, ⌘Q, and double-clicking. Ctrl-C,
+or `npx xokolat stop`, is how it is stopped.
 
 ## 2026-10-05 — The word is `workflow`. `recipe` is retired.
 

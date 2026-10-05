@@ -24,7 +24,7 @@ say() { printf 'comfyui: %s\n' "$*"; }
 die() { printf 'comfyui: %s\n' "$*" >&2; exit 1; }
 
 [ -f "$COMFY/main.py" ] || die "no ComfyUI at $COMFY (set COMFY_HOME)"
-[ -x "$PY" ] || die "no venv at $COMFY/.venv — run _brew-service-comfyui/rebuild-venv.sh first"
+[ -x "$PY" ] || die "no venv at $COMFY/.venv — run private/_brew-service-comfyui/rebuild-venv.sh first"
 
 cd "$COMFY" || die "cannot enter $COMFY"
 

@@ -28,7 +28,7 @@ export interface Roots {
    * both. ONE library, never several — see src/settings.ts.
    */
   readonly content: string
-  /** The repo (dev) or the unzipped `xokolat-<v>/` folder (shipped): shipped styles, `web/`, code.
+  /** The repo (dev) or `<data>/versions/<v>/`, where `npx xokolat` copies itself (shipped): shipped styles, `web/`, code.
    *  ⚠️ TREAT AS READ-ONLY. A newer download replaces the whole folder, and it may sit somewhere
    *  its user cannot write, so anything that writes here works on the dev machine and is lost or
    *  refused for every user. */

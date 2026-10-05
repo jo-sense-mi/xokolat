@@ -594,21 +594,6 @@ somebody has never seen should DO the first time they press ▶ on it. **Related
 brings what it needs) is the same instinct one level up — the argument there was that a pull should
 be big enough to work, announced rather than discovered.
 
-
-### 17 · `npx xokolat` — the one-line install
-
-**Blocked on two things, in this order:** xoko.lat updated to the new downloads (the zip replaces
-the `.dmg`), and the code published on GitHub under the new public name. An npm package is public
-the moment it exists, so it waits for the second.
-
-Today a person unzips and runs `npm start` (DECISIONS 2026-10-05). The
-one-liner is nicer, and one thing stands in its way: **Node will not strip types under
-`node_modules`** (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`, checked on 26.10), which is where
-npx puts a package. So the package's `bin` is a ~30-line plain-JS shim that copies the app out to a
-versioned folder under app data, runs `npm ci --omit=dev` there once, and starts it with `--open`.
-No build step, and the zip path does not change. Costs: an npm account (under the public name), an
-`npm publish` per release in `RELEASING.md`.
-
 ---
 
 ## The map — what a person can ask for, and what each is blocked on

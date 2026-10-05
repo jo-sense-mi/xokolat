@@ -37,7 +37,3 @@ node_modules/
 # your own notes, not the app
 deploymentguide.md
 deployment-oracle-linux-readiness.md
-
-# the publish check's list of personal identifiers (scripts/publish-public.ts) — publishing the
-# list would publish what it protects
-/.public-leaks

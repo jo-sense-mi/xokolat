@@ -20,7 +20,7 @@ is the only reason this reads like a repo path — and calling it "the source ch
 this confusing enough to need writing down (2026-09-04).
 
 `update-services.sh` resolves the shipped layer as `$(dirname $0)/../services`, so the same line
-works from a checkout today and from inside the unzipped download. That is why it
+works from a checkout today and from inside the copy `npx xokolat` makes. That is why it
 is **computed and never hardcoded**, and it is the reason nothing here has to change at packaging.
 The one thing that does change is the path in the topgrade line above, which is the user's.
 

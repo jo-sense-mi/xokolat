@@ -8,7 +8,7 @@ import { Queue } from '../jobs/lane.ts'
 import { DEFAULT_HOST, resolveHost, resolveIn, resolvePort, resolveRoots } from '../paths.ts'
 import { applySettings, ensureContentRoot, readSettings } from '../settings.ts'
 import { createHandler } from './app.ts'
-import { openBrowser, xokolatAt } from './open.ts'
+import { openBrowser, wantsOpen, xokolatAt } from './open.ts'
 
 const base = resolveRoots()
 const { settings, issues } = await readSettings(base.data)
@@ -18,7 +18,7 @@ const port = resolvePort()
 const host = resolveHost()
 // `--open` is `npm start`'s flag: the app has no window but the browser. `npm run restart` (dev)
 // leaves it off, so a restart does not open another tab.
-const open = process.argv.includes('--open')
+const open = wantsOpen(process.argv)
 const url = `http://${host === '0.0.0.0' ? '127.0.0.1' : host}:${port}`
 
 // App data is created on first run; the install root is never written to (a newer download

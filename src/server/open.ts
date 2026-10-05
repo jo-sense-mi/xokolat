@@ -16,6 +16,12 @@ function command(url: string): readonly string[] | null {
   }
 }
 
+/** `--open` was asked for and not overruled — `XOKOLAT_OPEN=0` keeps the browser shut, for a
+ *  machine with no screen or a test that must not open tabs on somebody's desktop. */
+export function wantsOpen(argv: readonly string[]): boolean {
+  return argv.includes('--open') && process.env['XOKOLAT_OPEN'] !== '0'
+}
+
 /** Fire and forget: the browser outlives this process, and a failure costs only the convenience —
  *  the address is in the banner either way. */
 export function openBrowser(url: string): void {

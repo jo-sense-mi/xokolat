@@ -27,20 +27,22 @@ const PUBLIC = join(OUT, 'public')
 const REMOTE = process.env['XOKOLAT_PUBLIC_REMOTE'] ?? 'git@github-jo-sense-mi:jo-sense-mi/xokolat.git'
 const AUTHOR = { name: 'jo-sense-mi', email: 'jo-sense-mi@users.noreply.github.com' }
 
-/** Tracked here, and not part of the project anyone else gets: this machine's service setup, the
- *  operator's deploy and release notes for their own server. */
-const EXCLUDE = [/^_brew-service-/, /^deploymentguide/, /^deployment-/, /^RELEASING\.md$/]
+/** Tracked here, and not part of the project anyone else gets: everything under `private/` — this
+ *  machine's service setup, the operator's release and deploy notes, their own notes. ONE folder,
+ *  so keeping something private is a matter of where it is, not of a list to remember. */
+const EXCLUDE = [/^private$/]
 
 const say = (line: string): void => { process.stdout.write(`  ${line}\n`) }
 const fail = (line: string): never => { process.stderr.write(`✗ ${line}\n`); process.exit(1) }
 const git = (cwd: string, args: readonly string[], env: Record<string, string> = {}): string =>
   execFileSync('git', args, { cwd, encoding: 'utf-8', env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'inherit'] })
 
-/** What must never appear in a published file — read from `.public-leaks`, one regex per line,
- *  which is gitignored: the list of a person's identifiers is itself the thing not to publish.
+/** What must never appear in a published file — read from `private/public-leaks`, one regex per
+ *  line. The list of a person's identifiers is itself the thing not to publish, which is why it
+ *  lives in the one folder that never is.
  *  A home path is always checked; `/Users/YOU` is the guides' placeholder. */
-const LEAKS_FILE = join(HERE, '.public-leaks')
-if (!existsSync(LEAKS_FILE)) fail('no .public-leaks — one regex per line: names, emails, hosts that must never be published')
+const LEAKS_FILE = join(HERE, 'private', 'public-leaks')
+if (!existsSync(LEAKS_FILE)) fail('no private/public-leaks — one regex per line: names, emails, hosts that must never be published')
 const LEAKS = new RegExp([
   ...readFileSync(LEAKS_FILE, 'utf-8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#')),
   '\\/Users\\/(?!YOU\\b)[a-z]',
@@ -96,6 +98,14 @@ if (!existsSync(join(PUBLIC, '.git'))) {
     git(PUBLIC, ['init', '--quiet', '-b', 'main'])
     git(PUBLIC, ['remote', 'add', 'origin', REMOTE])
   }
+}
+// Start from what is actually public: a practice run leaves an unpushed commit here, and the
+// next real publish must not carry it along as a second one.
+try {
+  git(PUBLIC, ['fetch', '--quiet', 'origin'])
+  git(PUBLIC, ['reset', '--quiet', '--hard', 'origin/main'])
+} catch {
+  // Nothing public yet, or the remote is unreachable — keep the local clone as it is.
 }
 for (const entry of readdirSync(PUBLIC)) {
   if (entry !== '.git') rmSync(join(PUBLIC, entry), { recursive: true, force: true })

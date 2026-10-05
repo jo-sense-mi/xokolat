@@ -84,7 +84,7 @@ Read these before writing code (all in `~/content-factory`):
 | `PROMPTING_FINDINGS.md` | Model facts (layer B in §5). These ship as code. |
 | `FORMAT.md`, `STICKERS.md`, `COLORING.md`, `MASCOTS.md` | The bundle contracts. |
 | `IDEAS.md` (search for "SPUN OUT as `xokolat`") | *History, not build material.* Why the project exists and which blockers were real — **with two decisions since revised**, see §3. |
-| `_brew-service-*/` (repo root, never shipped) | How the services are actually kept running — see §13. The operator's own orchestration; formulas install from the `xokolat/local` tap. |
+| `private/_brew-service-*/` (never shipped, never published) | How the services are actually kept running — see §13. The operator's own orchestration; formulas install from the `xokolat/local` tap. |
 
 **Zero dependency on miraverse.** `~/src/miraverse` is a separate product. content-factory's
 manifest builder imports `@miraverse/content-kit` only to walk works/universes/stories — which
@@ -1054,11 +1054,11 @@ bench). Text artifacts registry. Ideas + runbooks. The review lane.
 
 ### Phase 4 — packaging, and only then
 
-**One zip, Node 26 required, the browser as the window** (DECISIONS 2026-10-05): `npm run package`
-writes `out/xokolat-<v>.zip` — the app's files and nothing per-OS — and a person runs
-`npm start` (or `npm run background`), which installs once and opens their default browser. Electron was the plan, then a
-Swift window on macOS shipped as a `.dmg` (0.1.x); both buy a window at the price of one build per
-OS. `npx xokolat` is next (NEXT §17); per-OS native apps come back if there is traction.
+**`npx xokolat`, Node 26 required, the browser as the window** (DECISIONS 2026-10-05): the app is
+an npm package, and a person runs `npx xokolat` — it copies itself into app data once per version,
+installs its locked dependencies, and opens their default browser. Electron was the plan, then a
+Swift window on macOS shipped as a `.dmg` (0.1.x), then a zip for a day; each buys something at
+the price of one more artifact to build and host. Per-OS native apps come back if there is traction.
 
 Optionally the bundled-inference adapter, if there is proof the outcome layer sells — as a spawned
 sidecar process, which is what it would have been in a Python app too (§12).
@@ -1241,7 +1241,7 @@ it un-shippable; the app has an app-data dir and a content dir, both resolved on
 |---|---|---|---|
 | **app data** | `~/Library/Application Support/xokolat` (`%APPDATA%` on Windows, XDG on Linux) | your styles, the inference registry, stars, the index cache, provisioned models | **no** |
 | **content** — *the library* | `~/Documents/xokolat` | generated bundles and media runs | **yes**, 📁 section |
-| **install** | the repo (dev) or the unzipped `xokolat-<v>/` folder (shipped) | `web/`, the service rows, the kinds registry, code — **treat as read-only**, and it holds nothing runnable (DECISIONS 2026-08-16) | no |
+| **install** | the repo (dev) or `<data>/versions/<v>/`, where `npx xokolat` copies itself (shipped) | `web/`, the service rows, the kinds registry, code — **treat as read-only**, and it holds nothing runnable (DECISIONS 2026-08-16) | no |
 
 ⚠️ **App data and the library are DIFFERENT KINDS OF THING and do not share a folder.** App data is
 state the app manages and the user never opens. The library is *the user's work*. `~/Library` is
@@ -1316,8 +1316,8 @@ added to their phone's home screen**. Silently relocating that is worse than ref
   that feeds it — see §8.
 - **One builder first** — the sticker pack, written as the template the rest copy.
 - **TypeScript on Node**, front end lifted unchanged as vanilla JS (§3.13, §14).
-- **No desktop wrapper** — the person's browser is the window, one zip serves every OS, and
-  Node 26 is the requirement (Phase 4, DECISIONS 2026-10-05).
+- **No desktop wrapper** — the person's browser is the window, `npx xokolat` serves every OS,
+  and Node 26 is the requirement (Phase 4, DECISIONS 2026-10-05).
 - **The cutout is in-house and tiered** (§13), so `onnxruntime-node` may never ship.
 
 **Resolved in the first cold review (same day) — the answers a builder needed:**
@@ -1469,8 +1469,8 @@ run" *is* the first-run experience, and getting it wrong produces silent failure
 errors. Read these before writing the first adapter (the operator's own orchestration, at the
 repo root and never shipped; formulas install from the `xokolat/local` tap):
 
-- `_brew-service-drawthings-grpc/` — formula + `service-runner.sh`
-- `_brew-service-rembg/` — formula + supervisor loop
+- `private/_brew-service-drawthings-grpc/` — formula + `service-runner.sh`
+- `private/_brew-service-rembg/` — formula + supervisor loop
 
 ### The five things they already learned
 

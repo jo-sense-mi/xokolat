@@ -2,7 +2,7 @@
 # The Draw Things gRPC server → latest first-party release.
 #
 # ⚠️ THIS ONE HAS NO master TO FOLLOW. gRPCServerCLI-macOS is a ~200MB binary published as a
-# release asset by drawthingsai/draw-things-community, kept in _brew-service-drawthings-grpc/bin/ beside the runner.
+# release asset by drawthingsai/draw-things-community, kept in private/_brew-service-drawthings-grpc/bin/ beside the runner.
 # Nothing on this machine versions it: not brew, not git, not topgrade. That is exactly why it sat
 # at a July build while everything around it moved — a loose binary drifts silently forever.
 #
@@ -13,7 +13,7 @@
 # Never needs sudo. Never downloads a model — it only points at the app's own Models directory.
 set -uo pipefail
 
-BIN="${DT_GRPC_BIN:-$(cd "$(dirname "$0")/../.." && pwd)/_brew-service-drawthings-grpc/bin/gRPCServerCLI-macOS}"
+BIN="${DT_GRPC_BIN:-$(cd "$(dirname "$0")/../.." && pwd)/private/_brew-service-drawthings-grpc/bin/gRPCServerCLI-macOS}"
 REPO="drawthingsai/draw-things-community"
 ASSET="gRPCServerCLI-macOS"
 SERVICE="draw-things-grpc"

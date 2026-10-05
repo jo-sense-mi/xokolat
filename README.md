@@ -17,13 +17,17 @@ The app ships empty: workflows, styles and compositions arrive from the library 
 Needs **Node 26** ([nodejs.org](https://nodejs.org)) — nothing else; macOS, Windows and Linux alike.
 
 ```bash
-npm start                 # xokolat in this terminal; Ctrl-C stops it
-npm run background        # xokolat with the terminal free to close
-npm run stop              # stops a background one
+npx xokolat               # xokolat in this terminal; Ctrl-C stops it
+npx xokolat background    # xokolat with the terminal free to close
+npx xokolat stop          # stops a background one
+npx xokolat@latest        # the newest version — xokolat says when there is one
 ```
 
-The first start installs dependencies. Your browser opens on `http://127.0.0.1:18080`; starting
-again while it is up just opens the browser.
+The first start sets xokolat up (a few seconds, online). Your browser opens on
+`http://127.0.0.1:18080`; starting again while it is up just opens the browser.
+
+From a checkout of this repository, the same three are `npm start`, `npm run background` and
+`npm run stop`.
 
 | | where |
 |---|---|
@@ -40,7 +44,7 @@ npm ci
 npm run dev               # watch mode on :18081, reading .env.dev
 npm run restart           # the same without watching — after any server-side change
 npm run check             # typecheck, front-end load, tests — before every commit
-npm run package           # → out/xokolat-<version>.zip, the download
+npm run publish-npm -- --pack   # → out/xokolat-<version>.tgz, exactly what npx would run
 ```
 
 Dev runs on **18081** with its own folders (`xokolat-dev`, see `.env.dev`), so it never collides

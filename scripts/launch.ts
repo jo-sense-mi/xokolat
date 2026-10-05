@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-// `npm start` and `npm run background` — what a person who unzipped xokolat actually types.
+// Start and background — what `npx xokolat` runs inside the copy it makes (cli/xokolat.mjs), and
+// what `npm start` / `npm run background` run in a checkout.
 //
-// ⚠️ IT INSTALLS FIRST, ONCE. The zip carries no node_modules (sharp is per-platform, and the
+// ⚠️ IT INSTALLS FIRST, ONCE. The copy carries no node_modules (sharp is per-platform, and the
 // user's own npm fetches the right one), so the first start runs `npm ci` and every later one goes
-// straight to the server. "Once" is a marker holding the lockfile's hash: a newer download
-// unzipped over the same folder brings a different lockfile and installs again; nothing else does.
+// straight to the server. "Once" is a marker holding the lockfile's hash: a different lockfile in
+// the same folder installs again; nothing else does.
 //
 // ⚠️ THIS FILE IMPORTS NOTHING THAT NEEDS node_modules — that is the whole reason it exists apart
 // from src/server/main.ts, which loads sharp on its first line and would crash before it could
@@ -20,7 +21,7 @@ import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'no
 import { join } from 'node:path'
 
 import { resolveHost, resolveIn, resolvePort, resolveRoots } from '../src/paths.ts'
-import { openBrowser, xokolatAt } from '../src/server/open.ts'
+import { openBrowser, wantsOpen, xokolatAt } from '../src/server/open.ts'
 
 const roots = resolveRoots()
 const out = (line: string): void => { process.stdout.write(`${line}\n`) }
@@ -54,7 +55,7 @@ if (!process.argv.includes('--background')) {
   // Already up is the answer, not a second server failing on the port into the log.
   if (await xokolatAt(url) !== null) {
     out(`✓ xokolat is already running · ${url}`)
-    if (process.argv.includes('--open')) openBrowser(url)
+    if (wantsOpen(process.argv)) openBrowser(url)
     process.exit(0)
   }
 
@@ -83,6 +84,7 @@ if (!process.argv.includes('--background')) {
   }
   out(`✓ xokolat is running in the background · ${url}`)
   out(`  log   ${logPath}`)
-  out('  stop  npm run stop')
+  // How to stop it, in the words of however it was started — npx sets this, a folder does not.
+  out(`  stop  ${process.env['XOKOLAT_STOP_HINT'] ?? 'npm run stop'}`)
   process.exit(0)
 }
